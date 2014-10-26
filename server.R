@@ -7,6 +7,7 @@ require(scales)
 require(magrittr)
 require(stringr)
 
+
 # Tidy the data
 all_states <- map_data("state") %>% select(-subregion)
 
@@ -37,7 +38,6 @@ shinyServer(function(input, output) {
   	as.factor(cut(all_states[,datasetInput()], input$cuts))
   })
 
-
   output$distPlot <- renderPlot({
   	all_states$colorgroup = cutsInput()
 
@@ -54,5 +54,22 @@ shinyServer(function(input, output) {
 	xlab("Longitude") +
 	ylab("Latitude") +
 	scale_fill_discrete(name=input$obs)
-  })
+  }, height=200)
+
+  output$distPlot2 <- renderPlot({
+  	
+  	data<-data[order(data[,datasetInput()]), ]
+
+  	data$region <- factor(data$region, data$region)
+  	data <- tail(data,10)
+
+
+  	ggplot() +
+		geom_bar(data=data, aes_string(y=datasetInput(), x="region"),stat="identity", fill="orange", color="black") +
+		theme(axis.text.x=element_text(angle=90)) +
+		ylab(input$obs) +
+		xlab('State') +
+		coord_flip()
+
+  }, height=200)
 })
